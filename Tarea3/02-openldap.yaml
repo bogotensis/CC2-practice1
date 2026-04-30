@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  namespace: owncloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openldap
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      containers:
+        - name: openldap
+          image: docker.io/osixia/openldap:1.5.0
+          env:
+            - name: LDAP_ORGANISATION
+              value: "Example Inc."
+            - name: LDAP_DOMAIN
+              value: "example.org"
+            - name: LDAP_ADMIN_PASSWORD
+              value: "admin"
+          ports:
+            - containerPort: 389
+            - containerPort: 636
+          volumeMounts:
+            - name: slapd-database
+              mountPath: /var/lib/ldap
+            - name: slapd-config
+              mountPath: /etc/ldap/slapd.d
+      volumes:
+        - name: slapd-database
+          persistentVolumeClaim:
+            claimName: slapd-database-pvc
+        - name: slapd-config
+          persistentVolumeClaim:
+            claimName: slapd-config-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+  namespace: owncloud
+spec:
+  selector:
+    app: openldap
+  ports:
+    - name: ldap
+      port: 389
+      targetPort: 389
+    - name: ldaps
+      port: 636
+      targetPort: 636
