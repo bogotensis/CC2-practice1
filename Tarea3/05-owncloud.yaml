@@ -20,7 +20,7 @@ spec:
             - name: OWNCLOUD_DOMAIN
               value: "docker.ugr.es:20160"
             - name: OWNCLOUD_TRUSTED_DOMAINS
-              value: "docker.ugr.es"
+              value: "docker.ugr.es localhost 127.0.0.1"
             - name: OWNCLOUD_DB_TYPE
               value: "mysql"
             - name: OWNCLOUD_DB_HOST
@@ -42,9 +42,8 @@ spec:
           ports:
             - containerPort: 8080
           readinessProbe:
-            httpGet:
-              path: /status.php
-              port: 8080
+            exec:
+              command: ["curl", "-sf", "http://localhost:8080/status.php"]
             initialDelaySeconds: 30
             periodSeconds: 15
           volumeMounts:
