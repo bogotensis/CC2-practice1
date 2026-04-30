@@ -6,7 +6,7 @@ services:
     image: docker.io/haproxytech/haproxy-alpine:2.4
     container_name: haproxy
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,z
     ports:
       - "20160:80"
       - "20165:8404"
@@ -42,6 +42,11 @@ services:
       MARIADB_ROOT_PASSWORD: rootpassword
     volumes:
       - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - owncloud_net
 
@@ -55,9 +60,17 @@ services:
     image: docker.io/owncloud/server:latest
     container_name: owncloud1
     depends_on:
-      - mariadb
-      - redis
-      - openldap
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      openldap:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/status.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     environment:
       OWNCLOUD_DOMAIN: docker.ugr.es:20160
       OWNCLOUD_TRUSTED_DOMAINS: docker.ugr.es
@@ -79,9 +92,10 @@ services:
     image: docker.io/owncloud/server:latest
     container_name: owncloud2
     depends_on:
-      - mariadb
-      - redis
-      - openldap
+      owncloud1:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
     environment:
       OWNCLOUD_DOMAIN: docker.ugr.es:20160
       OWNCLOUD_TRUSTED_DOMAINS: docker.ugr.es
