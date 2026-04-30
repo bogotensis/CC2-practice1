@@ -1,0 +1,74 @@
+version: "3"
+
+services:
+
+  openldap:
+    image: docker.io/osixia/openldap:1.5.0
+    container_name: openldap
+    environment:
+      LDAP_ORGANISATION: "Example Inc."
+      LDAP_DOMAIN: "example.org"
+      LDAP_ADMIN_PASSWORD: "admin"
+    volumes:
+      - slapd_database:/var/lib/ldap
+      - slapd_config:/etc/ldap/slapd.d
+    ports:
+      - "20163:389"
+      - "20164:636"
+    networks:
+      - owncloud_net
+
+  mariadb:
+    image: docker.io/library/mariadb:latest
+    container_name: mariadb
+    environment:
+      MARIADB_DATABASE: owncloud
+      MARIADB_USER: owncloud
+      MARIADB_PASSWORD: owncloud
+      MARIADB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - owncloud_net
+
+  redis:
+    image: docker.io/library/redis:latest
+    container_name: redis
+    networks:
+      - owncloud_net
+
+  owncloud:
+    image: docker.io/owncloud/server:latest
+    container_name: owncloud
+    depends_on:
+      - mariadb
+      - redis
+      - openldap
+    environment:
+      OWNCLOUD_DOMAIN: docker.ugr.es:20160
+      OWNCLOUD_TRUSTED_DOMAINS: docker.ugr.es
+      OWNCLOUD_DB_TYPE: mysql
+      OWNCLOUD_DB_HOST: mariadb
+      OWNCLOUD_DB_NAME: owncloud
+      OWNCLOUD_DB_USERNAME: owncloud
+      OWNCLOUD_DB_PASSWORD: owncloud
+      OWNCLOUD_ADMIN_USERNAME: admin
+      OWNCLOUD_ADMIN_PASSWORD: admin
+      OWNCLOUD_REDIS_ENABLED: "true"
+      OWNCLOUD_REDIS_HOST: redis
+    volumes:
+      - owncloud_data:/mnt/data
+    ports:
+      - "20160:8080"
+    networks:
+      - owncloud_net
+
+volumes:
+  slapd_database:
+  slapd_config:
+  mariadb_data:
+  owncloud_data:
+
+networks:
+  owncloud_net:
+    driver: bridge

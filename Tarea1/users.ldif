@@ -1,0 +1,70 @@
+# Organizational Unit: People
+dn: ou=People,dc=example,dc=org
+ou: People
+objectClass: top
+objectClass: organizationalUnit
+description: Usuarios de la organizacion
+
+# Organizational Unit: Groups
+dn: ou=Groups,dc=example,dc=org
+ou: Groups
+objectClass: top
+objectClass: organizationalUnit
+description: Grupos de la organizacion
+
+# Group: employees
+dn: cn=employees,ou=Groups,dc=example,dc=org
+cn: employees
+objectClass: top
+objectClass: groupOfNames
+member: uid=ahortua,ou=People,dc=example,dc=org
+member: uid=jperez,ou=People,dc=example,dc=org
+member: uid=mgarcia,ou=People,dc=example,dc=org
+
+# User: ahortua (admin)
+dn: uid=ahortua,ou=People,dc=example,dc=org
+cn: Andrei Hortua
+uid: ahortua
+sn: Hortua
+objectClass: top
+objectClass: posixAccount
+objectClass: inetOrgPerson
+uidNumber: 1001
+gidNumber: 1000
+homeDirectory: /home/ahortua
+loginShell: /bin/bash
+gecos: Andrei Hortua
+userPassword: {crypt}x
+mail: ahortua@example.org
+
+# User: jperez
+dn: uid=jperez,ou=People,dc=example,dc=org
+cn: Juan Perez
+uid: jperez
+sn: Perez
+objectClass: top
+objectClass: posixAccount
+objectClass: inetOrgPerson
+uidNumber: 1002
+gidNumber: 1000
+homeDirectory: /home/jperez
+loginShell: /bin/bash
+gecos: Juan Perez
+userPassword: {crypt}x
+mail: jperez@example.org
+
+# User: mgarcia
+dn: uid=mgarcia,ou=People,dc=example,dc=org
+cn: Maria Garcia
+uid: mgarcia
+sn: Garcia
+objectClass: top
+objectClass: posixAccount
+objectClass: inetOrgPerson
+uidNumber: 1003
+gidNumber: 1000
+homeDirectory: /home/mgarcia
+loginShell: /bin/bash
+gecos: Maria Garcia
+userPassword: {crypt}x
+mail: mgarcia@example.org
